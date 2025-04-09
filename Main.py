@@ -378,7 +378,7 @@ def fill_db():
     """
     Stuff the database with card data from the CSV file.
     """
-    
+
     connection = _create_connection()
     cursor = connection.cursor()
 
@@ -731,7 +731,7 @@ def _download_convert_image(url, filename):
 
 
 if __name__ == "__main__":
-    # create_csv()
+    create_csv()
     create_db_structure()
     fill_db()
     # update_db()
