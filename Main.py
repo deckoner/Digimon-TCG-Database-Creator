@@ -376,6 +376,8 @@ def fill_db():
     """
     Stuff the database with card data from the CSV file.
     """
+    _create_database_if_not_exists()
+
     connection = _create_connection()
     cursor = connection.cursor()
 
@@ -573,6 +575,40 @@ def _create_connection():
     except Error as e:
         print(f"MySQL connection error: {e}")
         return None
+
+
+def _create_database_if_not_exists():
+    """
+    Checks if the database exists and creates it if not.
+    """
+    db_name = os.getenv("DB_NAME")
+    if not db_name:
+        print("Error: DB_NAME is not defined in environment variables.")
+        return
+
+    try:
+        # Connect without specifying database
+        connection = mysql.connector.connect(
+            host=os.getenv("DB_HOST"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
+        )
+        cursor = connection.cursor()
+
+        # Check database existence
+        cursor.execute(
+            "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = %s",
+            (db_name,)
+        )
+        if not cursor.fetchone():
+            cursor.execute(f"CREATE DATABASE {db_name}")
+            print(f"Database '{db_name}' created successfully.")
+
+        cursor.close()
+        connection.close()
+
+    except Error as e:
+        print(f"Database creation error: {e}")
 
 
 def _get_id(dictionary, value, cursor, table):
