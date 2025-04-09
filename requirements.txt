@@ -5,3 +5,4 @@ beautifulsoup4
 pillow
 python-dotenv
 mysql-connector-python
+lxml
