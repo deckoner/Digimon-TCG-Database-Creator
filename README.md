@@ -31,7 +31,7 @@ DB_NAME=your_database_name
 This project is exclusively for personal use and non-commercial purposes.
 
 All rights to the Digimon TCG card game belong to Bandai.
-This project has no official relationship with Bandai or the game development team.
+This project has no official relationship with Bandai or the TCG development team.
 
 It only seeks to facilitate access to information for individual use.
 
