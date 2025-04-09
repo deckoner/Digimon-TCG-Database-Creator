@@ -22,10 +22,10 @@ DB_NAME=your_database_name
 ```
 
 # ⚠️ Warnings and limitations
--The data is obtained directly from the official Digimon TCG site, which may contain errors.
--For example, some cards do not have their rarity defined, which generates an entry with rarity “ ” (empty).
--This is not corrected by the script, as the Digimon website is being corrected, as of today 09/04/2025 the only error is the empty rarity but in the future there may be another or this error is no longer there.
--The only error that the script does correct automatically is when a card appears duplicated on the official website.
+- The data is obtained directly from the official Digimon TCG site, which may contain errors.
+- For example, some cards do not have their rarity defined, which generates an entry with rarity “ ” (empty).
+- This is not corrected by the script, as the Digimon website is being corrected, as of today 09/04/2025 the only error is the empty rarity but in the future there may be another or this error is no longer there.
+- The only error that the script does correct automatically is when a card appears duplicated on the official website.
 
 ## 📌 License and Rights
 This project is exclusively for personal use and non-commercial purposes.
