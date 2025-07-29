@@ -807,10 +807,10 @@ def _download_convert_image(url, filename):
 
 
 if __name__ == "__main__":
-    # create_csv()
-    # create_db_structure()
-    # fill_db()
+    create_csv()
+    create_db_structure()
+    fill_db()
     # update_db()
     # download_images()
-    import_collection_from_json("digimon-card-collector (1).json")
+    # import_collection_from_json("digimon-card-collector (1).json")
     print("All operations completed")
