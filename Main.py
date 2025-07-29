@@ -7,6 +7,7 @@ Author: Deckoner
 import os
 import csv
 import re
+import json
 from concurrent.futures import ThreadPoolExecutor
 
 # Third party imports
@@ -559,6 +560,81 @@ def update_db():
     print("Base de datos actualizada correctamente")
 
 
+def import_collection_from_json(json_path):
+    """
+    Import cards from JSON to the MySQL database
+    It is designed to work with JSON generated from https://digimoncard.app
+    """
+    # Read the JSON file
+    with open(json_path, 'r', encoding='utf-8') as file:
+        data = json.load(file)
+
+    collection = data.get("collection", [])
+    merged_collection = {}
+
+    # Merge card variants by normalizing ID and summing counts
+    for item in collection:
+        raw_id = item.get("id")
+        count = item.get("count", 0)
+
+        if count <= 0:
+            continue
+
+        normalized_id = re.sub(r'_P\d+$', '', raw_id)
+        merged_collection[normalized_id] = merged_collection.get(normalized_id, 0) + count
+
+    if not merged_collection:
+        print("No valid cards to import.")
+        return
+
+    connection = _create_connection()
+    if not connection:
+        print("Could not connect to the database.")
+        return
+
+    cursor = connection.cursor()
+
+    card_ids = list(merged_collection.keys())
+
+    # Batch query: Get valid card numbers from Cards table
+    format_strings = ','.join(['%s'] * len(card_ids))
+    cursor.execute(f"SELECT card_number FROM Cards WHERE card_number IN ({format_strings})", card_ids)
+    valid_cards = {row[0] for row in cursor.fetchall()}
+
+    # Batch query: Get existing quantities from Collection table
+    cursor.execute(f"SELECT card_number, quantity FROM Collection WHERE card_number IN ({format_strings})", card_ids)
+    existing_collection = {row[0]: row[1] for row in cursor.fetchall()}
+
+    # Process valid cards only
+    for card_id in valid_cards:
+        new_count = merged_collection[card_id]
+        current_count = existing_collection.get(card_id)
+
+        if current_count is None:
+            # Insert new record
+            cursor.execute("""
+                INSERT INTO Collection (card_number, quantity)
+                VALUES (%s, %s)
+            """, (card_id, new_count))
+        elif current_count != new_count:
+            # Update existing record only if count changed
+            cursor.execute("""
+                UPDATE Collection
+                SET quantity = %s
+                WHERE card_number = %s
+            """, (new_count, card_id))
+
+    # Log invalid cards
+    invalid_cards = set(card_ids) - valid_cards
+    for invalid in invalid_cards:
+        print(f"[!] Card not found in the database: {invalid}")
+
+    connection.commit()
+    cursor.close()
+    connection.close()
+    print("Collection import completed.")
+
+
 def _create_connection():
     """
     Connecting to the database
@@ -731,9 +807,10 @@ def _download_convert_image(url, filename):
 
 
 if __name__ == "__main__":
-    create_csv()
-    create_db_structure()
-    fill_db()
+    # create_csv()
+    # create_db_structure()
+    # fill_db()
     # update_db()
     # download_images()
+    import_collection_from_json("digimon-card-collector (1).json")
     print("All operations completed")
